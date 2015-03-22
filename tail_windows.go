@@ -3,7 +3,7 @@
 package tail
 
 import (
-	"github.com/ActiveState/tail/winfile"
+	"github.com/jrossi/tail/winfile"
 	"os"
 )
 

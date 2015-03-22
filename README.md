@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/ActiveState/tail.svg)](https://travis-ci.org/ActiveState/tail)
+
+This is my personal fork of this.  You don't want this 
 
 # Go package for tail-ing files
 
@@ -11,7 +12,6 @@ for line := range t.Lines {
 }
 ```
 
-See [API documentation](http://godoc.org/github.com/ActiveState/tail).
 
 ## Log rotation
 
@@ -20,5 +20,5 @@ designed to work with log rotation tools.
 
 ## Installing
 
-    go get github.com/ActiveState/tail/...
+    go get github.com/jrossi/tail/...
 

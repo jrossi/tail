@@ -5,9 +5,9 @@ package tail
 import (
 	"bufio"
 	"fmt"
-	"github.com/ActiveState/tail/ratelimiter"
-	"github.com/ActiveState/tail/util"
-	"github.com/ActiveState/tail/watch"
+	"github.com/jrossi/tail/ratelimiter"
+	"github.com/jrossi/tail/util"
+	"github.com/jrossi/tail/watch"
 	"gopkg.in/tomb.v1"
 	"io"
 	"io/ioutil"
@@ -61,7 +61,7 @@ type Tail struct {
 	Lines    chan *Line
 	Config
 
-	file    *os.File
+	File    *os.File
 	reader  *bufio.Reader
 	watcher watch.FileWatcher
 	changes *watch.FileChanges
@@ -104,7 +104,7 @@ func TailFile(filename string, config Config) (*Tail, error) {
 
 	if t.MustExist {
 		var err error
-		t.file, err = OpenFile(t.Filename)
+		t.File, err = OpenFile(t.Filename)
 		if err != nil {
 			return nil, err
 		}
@@ -120,10 +120,10 @@ func TailFile(filename string, config Config) (*Tail, error) {
 // it may readed one line in the chan(tail.Lines),
 // so it may lost one line.
 func (tail *Tail) Tell() (offset int64, err error) {
-	if tail.file == nil {
+	if tail.File == nil {
 		return
 	}
-	offset, err = tail.file.Seek(0, os.SEEK_CUR)
+	offset, err = tail.File.Seek(0, os.SEEK_CUR)
 	if err == nil {
 		offset -= int64(tail.reader.Buffered())
 	}
@@ -138,18 +138,18 @@ func (tail *Tail) Stop() error {
 
 func (tail *Tail) close() {
 	close(tail.Lines)
-	if tail.file != nil {
-		tail.file.Close()
+	if tail.File != nil {
+		tail.File.Close()
 	}
 }
 
 func (tail *Tail) reopen() error {
-	if tail.file != nil {
-		tail.file.Close()
+	if tail.File != nil {
+		tail.File.Close()
 	}
 	for {
 		var err error
-		tail.file, err = OpenFile(tail.Filename)
+		tail.File, err = OpenFile(tail.Filename)
 		if err != nil {
 			if os.IsNotExist(err) {
 				tail.Logger.Printf("Waiting for %s to appear...", tail.Filename)
@@ -199,7 +199,7 @@ func (tail *Tail) tailFileSync() {
 
 	// Seek to requested location on first open of the file.
 	if tail.Location != nil {
-		_, err := tail.file.Seek(tail.Location.Offset, tail.Location.Whence)
+		_, err := tail.File.Seek(tail.Location.Offset, tail.Location.Whence)
 		tail.Logger.Printf("Seeked %s - %+v\n", tail.Filename, tail.Location)
 		if err != nil {
 			tail.Killf("Seek error on %s: %s", tail.Filename, err)
@@ -267,7 +267,7 @@ func (tail *Tail) tailFileSync() {
 // reopened if ReOpen is true. Truncated files are always reopened.
 func (tail *Tail) waitForChanges() error {
 	if tail.changes == nil {
-		st, err := tail.file.Stat()
+		st, err := tail.File.Stat()
 		if err != nil {
 			return err
 		}
@@ -310,19 +310,19 @@ func (tail *Tail) waitForChanges() error {
 func (tail *Tail) openReader() {
 	if tail.MaxLineSize > 0 {
 		// add 2 to account for newline characters
-		tail.reader = bufio.NewReaderSize(tail.file, tail.MaxLineSize+2)
+		tail.reader = bufio.NewReaderSize(tail.File, tail.MaxLineSize+2)
 	} else {
-		tail.reader = bufio.NewReader(tail.file)
+		tail.reader = bufio.NewReader(tail.File)
 	}
 }
 
 func (tail *Tail) seekEnd() error {
-	_, err := tail.file.Seek(0, 2)
+	_, err := tail.File.Seek(0, 2)
 	if err != nil {
 		return fmt.Errorf("Seek error on %s: %s", tail.Filename, err)
 	}
 	// Reset the read buffer whenever the file is re-seek'ed
-	tail.reader.Reset(tail.file)
+	tail.reader.Reset(tail.File)
 	return nil
 }
 

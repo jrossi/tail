@@ -4,8 +4,8 @@ package watch
 
 import (
 	"fmt"
-	"github.com/ActiveState/tail/util"
 	"github.com/howeyc/fsnotify"
+	"github.com/jrossi/tail/util"
 	"gopkg.in/tomb.v1"
 	"os"
 	"path/filepath"
